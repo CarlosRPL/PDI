@@ -1,7 +1,7 @@
 from PIL import Image
 
 #abrir e converter para escala de cinza
-img = Image.open('imagem.jpg').convert('L')
+img = Image.open('imagens/imagem.jpg').convert('L')
 pixels = list(img.getdata())          # lista com todos os valores (0–255)
 largura, altura = img.size
 total = largura * altura
@@ -27,5 +27,5 @@ pixels_novos = [tabela[p] for p in pixels]
 
 img_nova = Image.new('L', (largura, altura))
 img_nova.putdata(pixels_novos)
-img_nova.save('equalizada.jpg')
+img_nova.save('imagens/equalizada.jpg')
 img_nova.show()

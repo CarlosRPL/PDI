@@ -3,7 +3,7 @@ import math
 #normalizando logo 
 def fdp_alvo(i):
     return (math.exp(i / 255) - 1) / (math.e - 1)
-img = Image.open('equalizada.jpg').convert('L')
+img = Image.open('imagens/equalizada.jpg').convert('L')
 pixels = list(img.getdata())
 largura, altura = img.size
 
@@ -31,5 +31,5 @@ pixels_novos = [cdf_alvo_inv[p] for p in pixels]
 
 img_final = Image.new('L', (largura, altura))
 img_final.putdata(pixels_novos)
-img_final.save('imagem_final.jpg')
+img_final.save('imagens/imagem_final.jpg')
 img_final.show()

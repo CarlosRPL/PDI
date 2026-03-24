@@ -1,6 +1,6 @@
 from PIL import Image, ImageDraw
 
-img = Image.open('equalizada.jpg').convert('L')
+img = Image.open('imagem_final.jpg').convert('L')
 pixels = list(img.getdata())
 
 histograma = [0] * 256
@@ -32,5 +32,5 @@ for v in [0, 64, 128, 192, 255]:
     draw.line([(x, graf_h + margem), (x, graf_h + margem + 5)], fill=(0, 0, 0))
     draw.text((x - 8, graf_h + margem + 7), str(v), fill=(0, 0, 0))
 
-img_graf.save('ehistogramaPoseq.jpg')
+img_graf.save('final.jpg')
 img_graf.show()

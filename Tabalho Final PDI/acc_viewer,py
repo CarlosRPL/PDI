@@ -1,0 +1,83 @@
+"""
+acc_viewer.py
+Lê arquivo(s) .acc (charmap comprimido em Huffman canônico) e renderiza
+de volta pra PNG usando os mesmos bitmaps de glifo do a.py.
+
+Uso:
+    python acc_viewer.py                # lista .acc do diretório atual e pergunta
+    python acc_viewer.py arquivo.acc    # renderiza um arquivo específico
+    python acc_viewer.py *.acc          # renderiza vários (shell expande o glob)
+"""
+
+import sys
+from pathlib import Path
+
+from hufman_acc import load_acc
+from a import GLYPHS_RAW, bits_to_block, render_charmap_to_image
+
+
+def build_glyphs_for_charmap(charmap):
+    """Monta só os glifos realmente usados no charmap (evita depender
+    da ordem/quantidade fixa do ORDER do a.py)."""
+    chars = {ch for row in charmap for ch in row}
+    return {ch: {"block": bits_to_block(GLYPHS_RAW[ch])} for ch in chars}
+
+
+def render_acc_file(acc_path, out_path=None):
+    acc_path = Path(acc_path)
+    charmap, cols, rows_out = load_acc(acc_path)
+
+    glyphs = build_glyphs_for_charmap(charmap)
+    out_img = render_charmap_to_image(charmap, glyphs)
+
+    if out_path is None:
+        out_path = acc_path.with_suffix(".png")
+    out_img.save(out_path)
+
+    print(f"{acc_path.name}: {cols}x{rows_out} chars -> "
+          f"{out_img.width}x{out_img.height}px salvo em {out_path}")
+    return out_img
+
+
+def escolher_arquivos_interativo(diretorio="."):
+    arquivos = sorted(Path(diretorio).glob("*.acc"))
+    if not arquivos:
+        print(f"Nenhum arquivo .acc encontrado em '{diretorio}'.")
+        return []
+
+    print("Arquivos .acc encontrados:\n")
+    for i, f in enumerate(arquivos, 1):
+        print(f"  [{i}] {f.name}")
+
+    escolha = input(
+        "\nDigite os números separados por vírgula (ou 'a' pra todos): "
+    ).strip()
+
+    if escolha.lower() == 'a':
+        return arquivos
+
+    indices = []
+    for parte in escolha.split(','):
+        parte = parte.strip()
+        if parte.isdigit():
+            idx = int(parte) - 1
+            if 0 <= idx < len(arquivos):
+                indices.append(idx)
+
+    return [arquivos[i] for i in indices]
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        alvos = [Path(p) for p in sys.argv[1:]]
+    else:
+        alvos = escolher_arquivos_interativo(".")
+
+    if not alvos:
+        print("Nada selecionado.")
+    else:
+        for acc_path in alvos:
+            try:
+                render_acc_file(acc_path)
+            except Exception as e:
+                print(f"Erro ao renderizar {acc_path}: {e}")
